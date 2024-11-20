@@ -1,0 +1,57 @@
+// p is the prime for the field F_p we are evaluating the quintics over
+// n is the nubmer of iterations we want to check for irreducibility
+
+function testQuinticIrred(p, n)
+
+	function polyTest(p)
+		All:=[];
+		R<x>:=PolynomialRing(FiniteField(p));
+		for a in [0..(p-1)] do
+			for b in [0..(p-1)] do
+				f:=x^5 + a*x + b;
+				All:=Append(All,f);
+			end for;
+		end for;
+		return All;
+	end function;
+
+	function iterate(f,n)
+		if n eq 1 then
+			return f;
+		elif n eq 2 then
+			f1:=f;
+			f2:=Evaluate(f, f1);
+			return f2;
+		else
+			for i in [1..(n-2)] do
+				n:=n-1;
+				fn:=Evaluate(f, iterate(f,n));
+				return fn;
+			end for;
+		end if;
+	end function;
+
+	function main(prevIrreducList, n)
+		for i in [1..n] do
+			Reduc:=[];
+			Irreduc:=[];
+			for poly in prevIrreducList do
+				if IsIrreducible(iterate(poly,i)) then
+					Irreduc:=Append(Irreduc, poly);
+				// else
+					// Reduc:=Append(Reduc, poly);
+				end if;
+			end for;
+
+			printf "Quintics of form x^p + ax + b over finite field Fp, for p=%o, NOT reducible after %o iterate:\n%o\n", p, i, Irreduc;
+
+			// prevIrreducList := Irreduc; // Update to compute the next iteration
+
+		end for;
+		return "Done";
+	end function;
+
+	All:=polyTest(p);
+	return main(All, n);
+
+end function;
