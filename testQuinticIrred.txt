@@ -1,9 +1,13 @@
-// p is the prime for the field F_p we are evaluating the quintics over
-// n is the nubmer of iterations we want to check for irreducibility
+// Number Theory Conference Research code
+// Autumn Nguyen
+// Last updated: Dec 2024
 
-function testQuinticIrred(p, n)
+function testQuinticIrred(prime, numIters)
+// prime is the prime for the field F_p we are evaluating the quintics over
+// numIters is the number of iterations we want to check for irreducibility
 
 	function polyTest(p)
+	// Compute all polynomials in a finite field F_p
 		All:=[];
 		R<x>:=PolynomialRing(FiniteField(p));
 		for a in [0..(p-1)] do
@@ -16,6 +20,7 @@ function testQuinticIrred(p, n)
 	end function;
 
 	function iterate(f,n)
+	// Compute the n-th iterate of a polynomial f
 		if n eq 1 then
 			return f;
 		elif n eq 2 then
@@ -31,27 +36,29 @@ function testQuinticIrred(p, n)
 		end if;
 	end function;
 
+	
 	function main(prevIrreducList, n)
+	// prevIrreducList: a list of polynomials to be iterated over
+	// n: the number of iterates to do to the polynomials to check for dynamical irreducibility 
+	// Note: one iterate here means f(f(x)), different with iterate in the context of the loops in the code
 		for i in [1..n] do
 			Reduc:=[];
 			Irreduc:=[];
 			for poly in prevIrreducList do
-				if IsIrreducible(iterate(poly,i)) then
+				if IsIrreducible(iterate(poly,i)) then // if the ith iterate of this polynomial is irreducible, add to Irreduc to print out
 					Irreduc:=Append(Irreduc, poly);
-				// else
-					// Reduc:=Append(Reduc, poly);
 				end if;
 			end for;
 
 			printf "Quintics of form x^p + ax + b over finite field Fp, for p=%o, NOT reducible after %o iterate:\n%o\n", p, i, Irreduc;
 
-			// prevIrreducList := Irreduc; // Update to compute the next iteration
+			prevIrreducList := Irreduc; // Shrink down the list of polynomials to do the next iterate to save computation power (since the polynomials that are already reducible in the ith iterate will definitely not be dynamically irreducible )
 
 		end for;
 		return "Done";
 	end function;
 
-	All:=polyTest(p);
-	return main(All, n);
+	All:=polyTest(prime);
+	return main(All, numIters);
 
 end function;
